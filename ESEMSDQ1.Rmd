@@ -1,0 +1,79 @@
+---
+title: "LMISDQSyntax"
+author: "Vas"
+date: '2022-07-06'
+output: html_document
+---
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+#Loading the packages to work with
+library(semTools)
+library(haven)
+library(semPlot)
+library(lavaan)
+library (psych)
+library (psychTools)
+library(tidyverse)
+library (SBSDiff)
+library (esem)
+
+
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+# Loading the data
+library(haven)
+data <- read_sav("data.sav")
+View(data)
+#to exclude
+#data<-data %>%filter(hicid!="51301195")
+data1<-data %>%select(-hicid)
+data1<-data1[1:25]
+view(data1)
+data2<-data%>%select(-hicid)%>%select(ends_with("_2"))
+data3<-data%>%select(ends_with("_3"))
+```
+
+Run the EFA/ESEM model at time point 1
+```{r echo=FALSE, warning=FALSE}
+esem_efa_results1 <- esem_efa(data1, 
+                      nfactors =5,
+                      fm = 'ML',
+                      rotate="geominT", 
+                      scores="regression", 
+                      residuals=TRUE, 
+                      missing=TRUE)
+
+
+```
+```{r}
+#Reviewing the generated loadings and creating a  referent items per factor, list
+esem_efa_results1$loadings
+
+fa.diagram(esem_efa_results1) 
+
+referent_list <- create_referent(esem_efa_results1)
+
+```
+```{r}
+esem_model1 <- esem_syntax(esem_efa_results1, referent_list)
+
+writeLines(esem_model1)
+
+```
+To test the model
+```{r}
+SDQ.fit.1 <- cfa(esem_model1, data1, estimator="WLSMV", meanstructure=F)
+summary(SDQ.fit.1, standardized = T, fit.measures = T, rsq = T)
+```
+
+```{r}
+semTools::reliability(SDQ.fit.1)
+```
+```{r}
+modindices(SDQ.fit.1,sort.=TRUE)
+```
+```{r}
+semPaths(SDQ.fit.1, whatLabels = "std", layout = "tree2", rotation = 2, sizeLat = 12, sizeInt = 5, sizeMan2 = 5, shapeMan = "square", shapeLat = "circle",node.width = 0.6, asize = 3, edge.label.cex = 0.75, fade = F)
+
+```
+
