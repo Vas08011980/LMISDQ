@@ -19,22 +19,9 @@ library (esem)
 
 ```
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-# Loading the data
-library(haven)
-data <- read_sav("data.sav")
-View(data)
-#to exclude
-#data<-data %>%filter(hicid!="51301195")
-data1<-data %>%select(-hicid)
-data1<-data1[1:25]
-view(data1)
-data2<-data%>%select(-hicid)%>%select(ends_with("_2"))
-data3<-data%>%select(ends_with("_3"))
-```
+```{r echo=FALSE, warning=FALSE, message=FALS}
+#Run the EFA/ESEM model at time point 1
 
-Run the EFA/ESEM model at time point 1
-```{r echo=FALSE, warning=FALSE}
 esem_efa_results1 <- esem_efa(data1, 
                       nfactors =5,
                       fm = 'ML',
@@ -42,38 +29,119 @@ esem_efa_results1 <- esem_efa(data1,
                       scores="regression", 
                       residuals=TRUE, 
                       missing=TRUE)
-
-
 ```
-```{r}
-#Reviewing the generated loadings and creating a  referent items per factor, list
-esem_efa_results1$loadings
 
-fa.diagram(esem_efa_results1) 
-
-referent_list <- create_referent(esem_efa_results1)
-
-```
 ```{r}
 esem_model1 <- esem_syntax(esem_efa_results1, referent_list)
 
 writeLines(esem_model1)
-
 ```
-To test the model
+
+
 ```{r}
+#To test the model
 SDQ.fit.1 <- cfa(esem_model1, data1, estimator="WLSMV", meanstructure=F)
 summary(SDQ.fit.1, standardized = T, fit.measures = T, rsq = T)
 ```
 
+Reliability
+
 ```{r}
 semTools::reliability(SDQ.fit.1)
 ```
+
 ```{r}
 modindices(SDQ.fit.1,sort.=TRUE)
 ```
+
 ```{r}
 semPaths(SDQ.fit.1, whatLabels = "std", layout = "tree2", rotation = 2, sizeLat = 12, sizeInt = 5, sizeMan2 = 5, shapeMan = "square", shapeLat = "circle",node.width = 0.6, asize = 3, edge.label.cex = 0.75, fade = F)
 
+```
+
+EFA ESEM model 2
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+esem_efa_results2 <- esem_efa(data2, 
+                      nfactors =5,
+                      fm = 'ML',
+                      rotate="geominT", 
+                      scores="regression", 
+                      residuals=TRUE, 
+                      missing=TRUE)
+```
+
+
+```{r}
+esem_model2 <- esem_syntax(esem_efa_results2, referent_list)
+
+writeLines(esem_model2)
+```
+
+```{r}
+SDQ.fit.2 <- cfa(esem_model2, data2, estimator="WLSMV", meanstructure=F)
+summary(SDQ.fit.2, standardized = T, fit.measures = T, rsq = T)
+```
+
+
+```{r}
+semTools::reliability(SDQ.fit.2)
+```
+
+Modindices
+```{r}
+modindices(SDQ.fit.2,sort.=TRUE)
+```
+Plot the SDQ2 Fit
+```{r}
+semPaths(SDQ.fit.2, whatLabels = "std", layout = "tree2", rotation = 2, sizeLat = 12, sizeInt = 5, sizeMan2 = 5, shapeMan = "square", shapeLat = "circle",node.width = 0.6, asize = 3, edge.label.cex = 0.75, fade = F)
+
+```
+```{r}
+# Calculate EFA ESEM model 3
+
+esem_efa_results3 <- esem_efa(data3, 
+                      nfactors =5,
+                      fm = 'ML',
+                      rotate="geominT", 
+                      scores="regression", 
+                      residuals=TRUE, 
+                      missing=TRUE)
+
+```
+Write ESEM Model 3
+```{r}
+esem_model3 <- esem_syntax(esem_efa_results3, referent_list)
+
+writeLines(esem_model3)
+```
+Test the ESEM Model 3
+```{r}
+SDQ.fit.3 <- cfa(esem_model3, data3, estimator="WLSMV", meanstructure=F)
+summary(SDQ.fit.3, standardized = T, fit.measures = T, rsq = T)
+```
+
+Reliabilities 3 and modindices 3
+```{r}
+semTools::reliability(SDQ.fit.3)
+modindices(SDQ.fit.3,sort.=TRUE)
+```
+Plot ESEM 3
+```{r}
+semPaths(SDQ.fit.3, whatLabels = "std", layout = "tree2", rotation = 2, sizeLat = 12, sizeInt = 5, sizeMan2 = 5, shapeMan = "square", shapeLat = "circle",node.width = 0.6, asize = 3, edge.label.cex = 0.75, fade = F)
+```
+
+
+
+```{r}
+#Introducing Configural model
+#ESEM_MODEL_LMI<-paste0(data,esem_model1,esem_model2,esem_model3, collapse = "/N")
+
+#writeLines(ESEM_MODEL_LMI)
+```
+
+#Test the model:
+```{r}
+#SDQ.fit.LMI <- cfa(ESEM_MODEL_LMI, data, estimator="WLSMV", meanstructure=F)
+#summary(SDQ.fit.LMI, standardized = T, fit.measures = T, rsq = T)
 ```
 
