@@ -19,7 +19,19 @@ library (esem)
 
 ```
 
-```{r echo=FALSE, warning=FALSE, message=FALS}
+Loasd the Data
+```{r}
+data<-read_sav("data.sav")
+data<-data%>%select(-hicid)
+data1<-data%>%select(ends_with("_1"))
+data2<-data%>%select(ends_with("_2"))
+data3<-data%>%select(ends_with("_3"))
+
+```
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 #Run the EFA/ESEM model at time point 1
 
 esem_efa_results1 <- esem_efa(data1, 
@@ -134,14 +146,18 @@ semPaths(SDQ.fit.3, whatLabels = "std", layout = "tree2", rotation = 2, sizeLat 
 
 ```{r}
 #Introducing Configural model
-#ESEM_MODEL_LMI<-paste0(data,esem_model1,esem_model2,esem_model3, collapse = "/N")
+ESEM_MODEL_LMI<-paste0(esem_model1,esem_model2,esem_model3, collapse = "/n")
 
-#writeLines(ESEM_MODEL_LMI)
+writeLines(ESEM_MODEL_LMI)
 ```
 
 #Test the model:
 ```{r}
 #SDQ.fit.LMI <- cfa(ESEM_MODEL_LMI, data, estimator="WLSMV", meanstructure=F)
 #summary(SDQ.fit.LMI, standardized = T, fit.measures = T, rsq = T)
+```
+
+```{r}
+ESEM_Metric<-""
 ```
 
